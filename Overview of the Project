@@ -1,0 +1,121 @@
+🔍 Project Overview
+
+This project presents an end-to-end financial analytics solution using real-world retail transaction data (541,909 records). The objective is to analyze business performance by integrating revenue forecasting, customer churn prediction, and profitability analysis using statistical and machine learning techniques.
+
+The project demonstrates how data-driven financial insights can support strategic planning, customer retention, and revenue optimization.
+
+🎯 Objectives
+
+Forecast future revenue trends using time-series modeling
+
+Identify customers at risk of churn using machine learning
+
+Evaluate overall and segment-wise profitability
+
+Generate actionable business insights for decision-making
+
+📂 Dataset
+
+The project utilizes the Online Retail Dataset from the UCI Machine Learning Repository.
+
+541,909 transactions
+
+8 features including InvoiceDate, Quantity, UnitPrice, CustomerID
+
+Revenue calculated as: Quantity × UnitPrice
+
+Cost assumed as 70% of revenue for profitability estimation
+
+🧹 Data Preprocessing
+
+Removed missing CustomerID values
+
+Eliminated negative quantities (returns)
+
+Converted InvoiceDate to datetime format
+
+Engineered new features: Revenue, Cost, Profit
+
+Aggregated monthly revenue for time-series analysis
+
+📈 Revenue Forecasting
+
+Aggregated monthly revenue from transaction data
+
+Tested stationarity using Augmented Dickey-Fuller test
+
+Implemented ARIMA (1,1,1) time-series model
+
+Forecasted revenue for the next 6 months
+
+Visualized historical and predicted revenue trends
+
+Business Value:
+
+Helps organizations in budgeting, financial planning, and demand estimation.
+
+🤖 Customer Churn Prediction
+
+Defined churn as customers inactive for more than 90 days
+
+Engineered customer-level features (Revenue, Frequency, Quantity)
+
+Implemented:
+
+Logistic Regression
+
+Random Forest Classifier
+
+Evaluated models using Accuracy, Confusion Matrix, Precision & Recall
+
+Business Value:
+
+Early identification of at-risk customers enables retention strategies and revenue protection.
+
+💰 Profitability Analysis
+
+Calculated total revenue: 8.9M+
+
+Estimated total profit: 2.67M+
+
+Computed profit margin ≈ 30%
+
+Identified top 20% customers contributing majority of profit
+
+Analyzed monthly profit trends
+
+Business Value:
+
+Helps optimize pricing strategies and focus on high-value customer segments.
+
+🛠 Technologies Used
+
+Python
+
+Pandas & NumPy
+
+Matplotlib & Seaborn
+
+Scikit-learn
+
+Statsmodels (ARIMA)
+
+📊 Key Insights
+
+Revenue shows seasonal and growth patterns over time
+
+A small segment of customers drives a large share of profit
+
+Churn risk can be predicted using customer activity patterns
+
+Integrating forecasting and ML improves financial decision-making
+
+🚀 Future Improvements
+
+Implement SARIMA for seasonal forecasting
+
+Perform hyperparameter tuning for improved accuracy
+
+Deploy as interactive dashboard (Power BI / Tableau)
+
+Integrate real-time data pipeline
