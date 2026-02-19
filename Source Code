@@ -1,0 +1,186 @@
+
+!pip install pandas numpy matplotlib seaborn scikit-learn statsmodels
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+
+from statsmodels.tsa.arima.model import ARIMA
+from pandas.errors import ParserError
+
+# Unzip the file if it's a ZIP archive
+!unzip -o retail_dataset.csv
+
+# Load your dataset (assuming the unzipped file is named online_retail.csv)
+try:
+    df = pd.read_csv("online_retail.csv", encoding='utf-8')
+except UnicodeDecodeError:
+    try:
+        df = pd.read_csv("online_retail.csv", encoding='latin1', sep=';')
+    except ParserError:
+        # Fallback for other potential parsing issues, e.g., if delimiter is not ';' either
+        # For now, we will re-raise or suggest manual inspection if this also fails.
+        raise # Re-raise if latin1 with semicolon also fails to give a clear error.
+
+df.head()
+
+df.info()
+df.describe()
+df.isnull().sum()
+# Remove missing CustomerID
+df = df.dropna(subset=['CustomerID'])
+
+# Remove negative or zero quantity
+df = df[df['Quantity'] > 0]
+
+# Convert date column
+df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'])
+
+# Create Revenue column
+df['Revenue'] = df['Quantity'] * df['UnitPrice']
+
+df.head()
+
+#Aggregate Monthly Revenue
+df['Month'] = df['InvoiceDate'].dt.to_period('M')
+
+monthly_revenue = df.groupby('Month')['Revenue'].sum()
+monthly_revenue = monthly_revenue.to_timestamp()
+
+#Visualize
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(10,5))
+monthly_revenue.plot()
+plt.title("Monthly Revenue Trend")
+plt.show()
+
+#Churn Analysis
+latest_date = df['InvoiceDate'].max()
+
+customer_last_purchase = df.groupby('CustomerID')['InvoiceDate'].max().reset_index()
+
+customer_last_purchase['Days_Since_Last_Purchase'] = \
+    (latest_date - customer_last_purchase['InvoiceDate']).dt.days
+
+customer_last_purchase['Churn'] = \
+    (customer_last_purchase['Days_Since_Last_Purchase'] > 90).astype(int)
+
+#Profitability Analysis
+df['Cost'] = df['Revenue'] * 0.7
+df['Profit'] = df['Revenue'] - df['Cost']
+
+total_revenue = df['Revenue'].sum()
+total_profit = df['Profit'].sum()
+
+print("Total Revenue:", total_revenue)
+print("Total Profit:", total_profit)
+
+#Churn Modeling
+# Remove rows without CustomerID
+df = df.dropna(subset=['CustomerID'])
+
+# Remove negative quantity (returns)
+df = df[df['Quantity'] > 0]
+
+# Convert InvoiceDate to datetime
+df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'])
+
+#Revenue ForeCasting
+df['Month'] = df['InvoiceDate'].dt.to_period('M')
+monthly_revenue = df.groupby('Month')['Revenue'].sum().to_timestamp()
+
+import matplotlib.pyplot as plt
+plt.figure(figsize=(10,5))
+monthly_revenue.plot()
+plt.title("Monthly Revenue Trend")
+plt.show()
+
+#Define CHurn
+latest_date = df['InvoiceDate'].max()
+
+customer_last_purchase = df.groupby('CustomerID')['InvoiceDate'].max().reset_index()
+
+customer_last_purchase['Days_Since_Last_Purchase'] = \
+    (latest_date - customer_last_purchase['InvoiceDate']).dt.days
+
+customer_last_purchase['Churn'] = \
+    (customer_last_purchase['Days_Since_Last_Purchase'] > 90).astype(int)
+
+customer_last_purchase['Churn'].value_counts()
+
+#Profitability by Customer
+customer_profit = df.groupby('CustomerID')['Profit'].sum().sort_values(ascending=False)
+
+print("Top 5 Profitable Customers:")
+print(customer_profit.head())
+
+#Prepare Monthly Revenue Data
+# Create Month column
+df['Month'] = df['InvoiceDate'].dt.to_period('M')
+
+# Aggregate monthly revenue
+monthly_revenue = df.groupby('Month')['Revenue'].sum()
+
+# Convert to timestamp
+monthly_revenue = monthly_revenue.to_timestamp()
+
+monthly_revenue.head()
+
+#Visualize Monthly Revenue
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(12,5))
+monthly_revenue.plot()
+plt.title("Monthly Revenue Trend")
+plt.xlabel("Month")
+plt.ylabel("Revenue")
+plt.show()
+
+#Check Stationarity
+from statsmodels.tsa.stattools import adfuller
+
+result = adfuller(monthly_revenue)
+
+print("ADF Statistic:", result[0])
+print("p-value:", result[1])
+
+#Make data stationary
+monthly_revenue_diff = monthly_revenue.diff().dropna()
+
+result = adfuller(monthly_revenue_diff)
+
+print("New p-value:", result[1])
+
+#Apply ARIMA Model
+
+from statsmodels.tsa.arima.model import ARIMA
+
+model = ARIMA(monthly_revenue, order=(1,1,1))
+model_fit = model.fit()
+
+print(model_fit.summary())
+
+#FOrecast next 6 months
+forecast = model_fit.forecast(steps=6)
+
+print("Next 6 Months Revenue Forecast:")
+print(forecast)
+
+#Plot Forecast
+plt.figure(figsize=(12,5))
+
+monthly_revenue.plot(label='Actual')
+forecast.plot(label='Forecast', color='red')
+
+plt.title("Revenue Forecast for Next 6 Months")
+plt.legend()
+plt.show()
